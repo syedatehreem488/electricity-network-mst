@@ -1,0 +1,26 @@
+name: Build and test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile the C++ program
+        run: g++ -std=c++17 -Wall -o mst src/main.cpp
+
+      - name: Run the report's sample network
+        run: |
+          printf '7\n5\n8\n' | (cd data && ../mst) | tee output.txt
+          grep -q "Total MST cost: 19" output.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check the web GUI gives the same MST as the C++ program
+        run: node tests/compare_with_cpp.js ./mst 300
