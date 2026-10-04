@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Electricity Network Planner</title>
+  <meta name="description" content="Plan the cheapest electricity network between cities with Kruskal's Minimum Spanning Tree algorithm. A DSA (CMPE 212) project, UET Lahore.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 2 6 18h8l-2 12 12-16h-8z' fill='%23F2B705' stroke='%231A2836' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="bolt" viewBox="0 0 32 32" aria-hidden="true"><path d="M18 2 6 18h8l-2 12 12-16h-8z"/></svg>
+      <div>
+        <h1>Electricity Network Planner</h1>
+        <p class="tagline">Find the cheapest set of power lines that reaches every city.</p>
+      </div>
+    </div>
+    <div class="file-actions">
+      <label class="select-wrap">
+        <span class="visually-hidden">Load an example network</span>
+        <select id="example-select">
+          <option value="">Load example…</option>
+          <option value="report">Report sample (4 cities)</option>
+          <option value="punjab">Punjab grid (10 cities)</option>
+          <option value="empty">Start empty</option>
+        </select>
+      </label>
+      <button type="button" class="btn ghost" id="import-btn">Import network.txt</button>
+      <input type="file" id="import-file" accept=".txt,text/plain" hidden>
+      <button type="button" class="btn ghost" id="export-btn">Export network.txt</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="board" aria-label="Network map">
+      <svg id="board" viewBox="0 0 1000 700" role="img" aria-labelledby="board-desc">
+        <desc id="board-desc">Map of cities and the power lines between them.</desc>
+        <defs>
+          <pattern id="grid-minor" width="25" height="25" patternUnits="userSpaceOnUse">
+            <path d="M25 0H0V25" class="grid-minor"/>
+          </pattern>
+          <pattern id="grid-major" width="125" height="125" patternUnits="userSpaceOnUse">
+            <rect width="125" height="125" fill="url(#grid-minor)"/>
+            <path d="M125 0H0V125" class="grid-major"/>
+          </pattern>
+        </defs>
+        <rect x="-2000" y="-2000" width="5000" height="5000" fill="url(#grid-major)"/>
+        <g id="edges-layer"></g>
+        <g id="nodes-layer"></g>
+      </svg>
+      <div class="board-empty" id="board-empty">
+        <p>No cities yet.</p>
+        <p>Add one on the right, or load the Punjab grid example to see the algorithm right away.</p>
+      </div>
+      <div class="readout" id="readout" aria-live="polite"></div>
+      <p class="board-hint">Drag cities to rearrange them. Click two cities to start a power line between them.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tab-build" aria-controls="pane-build" aria-selected="true">Build network</button>
+        <button role="tab" id="tab-run" aria-controls="pane-run" aria-selected="false" tabindex="-1">Run Kruskal's</button>
+      </div>
+
+      <div class="pane" id="pane-build" role="tabpanel" aria-labelledby="tab-build">
+        <section class="block">
+          <h2>Cities</h2>
+          <form id="city-form" class="row" autocomplete="off" novalidate>
+            <label class="field grow">
+              <span>City name</span>
+              <input id="city-name" type="text" maxlength="30" placeholder="e.g. Multan" required>
+            </label>
+            <button class="btn" type="submit">Add city</button>
+          </form>
+          <p class="msg" id="city-msg" aria-live="polite"></p>
+          <ul class="city-list" id="city-list"></ul>
+        </section>
+
+        <section class="block">
+          <h2>Power lines</h2>
+          <form id="edge-form" autocomplete="off" novalidate>
+            <div class="row">
+              <label class="field grow"><span>From</span><select id="edge-a"></select></label>
+              <label class="field grow"><span>To</span><select id="edge-b"></select></label>
+              <label class="field cost"><span>Cost</span><input id="edge-cost" type="number" min="0" step="1" inputmode="numeric" required></label>
+            </div>
+            <button class="btn wide" type="submit">Add power line</button>
+          </form>
+          <p class="msg" id="edge-msg" aria-live="polite"></p>
+          <table class="edge-table" id="edge-table">
+            <thead><tr><th scope="col">Between</th><th scope="col" class="num">Cost</th><th scope="col"><span class="visually-hidden">Remove</span></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </div>
+
+      <div class="pane" id="pane-run" role="tabpanel" aria-labelledby="tab-run" hidden>
+        <div class="player">
+          <button type="button" class="btn" id="play-btn">Play</button>
+          <button type="button" class="btn ghost" id="back-btn" aria-label="Previous step">Back</button>
+          <button type="button" class="btn ghost" id="step-btn" aria-label="Next step">Step</button>
+          <button type="button" class="btn ghost" id="end-btn">Show result</button>
+          <button type="button" class="btn ghost" id="reset-btn">Restart</button>
+          <label class="speed"><span>Speed</span><input type="range" id="speed" min="1" max="5" value="3"></label>
+        </div>
+
+        <p class="narration" id="narration" aria-live="polite"></p>
+
+        <section class="block">
+          <h2>Lines sorted by cost <small>(merge sort)</small></h2>
+          <ol class="sorted-list" id="sorted-list"></ol>
+        </section>
+
+        <section class="block">
+          <h2>Union-Find parent array</h2>
+          <p class="note">Each city points to a parent. Following parents up to a city that points to itself gives the group's root. Two cities with the same root are already connected.</p>
+          <table class="uf-table" id="uf-table">
+            <thead><tr><th scope="col" class="num">i</th><th scope="col">City</th><th scope="col">parent[i]</th><th scope="col">Root</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="foot">
+    <p>Data Structures &amp; Algorithms (CMPE 212) project, Computer Engineering, UET Lahore. The algorithm here is a direct port of the project's C++ code: merge sort, then Kruskal's with Union-Find. <a href="https://github.com/syedatehreem488/electricity-network-mst">Source on GitHub</a></p>
+  </footer>
+
+  <script src="js/kruskal.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
