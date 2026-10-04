@@ -1,0 +1,11 @@
+4
+Lahore
+Karachi
+Islamabad
+Peshawar
+5
+Lahore Karachi 10
+Lahore Islamabad 6
+Lahore Peshawar 5
+Karachi Islamabad 15
+Islamabad Peshawar 4

@@ -1,0 +1,16 @@
+# Build output
+mst
+mst.exe
+*.exe
+*.o
+a.out
+
+# Created when you run the program from the repo root
+/network.txt
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+node_modules/
