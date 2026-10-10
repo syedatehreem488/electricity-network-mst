@@ -121,7 +121,7 @@ Total MST cost: 19
 - Validate the menu input, so typing a letter instead of a number doesn't loop forever.
 
 ## Team
-- **Syeda Tehreem Fatima** (2024-CE-86), **Tooba Iftikhar** and **Haleema Ahsan**: original C++ console program (Kruskal's MST, merge sort, Union-Find, file save/load)
+- **Syeda Tehreem Fatima**, **Tooba Iftikhar** and **Haleema Ahsan**: original C++ console program (Kruskal's MST, merge sort, Union-Find, file save/load)
 
 - **Syeda Tehreem Fatima**: web GUI and visualisation, built with AI assistance
 
