@@ -120,10 +120,12 @@ Total MST cost: 19
 - City names must be one word, because `cin >>` reads word by word. `getline` would allow spaces.
 - Validate the menu input, so typing a letter instead of a number doesn't loop forever.
 
-## Author
-Syeda Tehreem Fatima (2024-CE-86), Computer Engineering, UET Lahore
+## Team
+- **Syeda Tehreem Fatima** (2024-CE-86), **Tooba Iftikhar** and **Haleema Ahsan**: original C++ console program (Kruskal's MST, merge sort, Union-Find, file save/load)
 
-Course instructor: Mr. Mujtaba Kamal Pasha
+- **Syeda Tehreem Fatima**: web GUI and visualisation, built with AI assistance
+
+Computer Engineering, UET Lahore · Course instructor: Mr. Mujtaba Kamal Pasha
 
 ## License
 [MIT](LICENSE)
